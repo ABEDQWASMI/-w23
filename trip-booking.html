@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Booking - AbuShakra Adventures</title>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="bg-black text-white">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Add translations object
+        const translations = {
+            en: {
+                home: 'Home',
+                book: 'Book',
+                gallery: 'Gallery',
+                guide: 'Guide',
+                more: 'More',
+                about: 'About',
+                contact: 'Contact',
+                faq: 'FAQ',
+                planTrip: 'Plan Trip',
+                form: {
+                    phone: 'Phone',
+                    dob: 'Date of Birth',
+                    familyName: 'Family Name',
+                    firstName: 'First Name',
+                    send: 'Send',
+                    city: 'City',
+                    email: 'Email',
+                    terms: 'I agree to the terms and conditions',
+                    offers: 'I want to receive offers'
+                },
+                footer: {
+                    newsletter: {
+                        title: 'Subscribe to Our Newsletter',
+                        description: 'Stay updated with our latest trips and offers'
+                    },
+                    followMe: 'Follow Me',
+                    contactUs: 'Contact Us',
+                    sendUs: 'Send us a message',
+                    importantLinks: 'Important Links',
+                    cookies: 'Cookie Policy',
+                    consumer: 'Consumer Rights',
+                    terms: 'Terms & Conditions',
+                    company: 'Company Info',
+                    planTrip: 'Plan Your Trip',
+                    visa: 'Visa Information',
+                    flight: 'Flight Booking',
+                    transport: 'Transportation',
+                    accommodation: 'Accommodation',
+                    adventures: 'Adventures',
+                    gear: 'Travel Gear',
+                    pages: 'Pages',
+                    book: 'Book Now',
+                    faq: 'FAQ',
+                    contact: 'Contact',
+                    about: 'About Us',
+                    costs: 'Costs & Fees',
+                    copyright: '© 2024 AbuShakra Adventures. All rights reserved.',
+                    photoCredit: 'Photos by various artists'
+                }
+            },
+            ar: {
+                home: 'الرئيسية',
+                book: 'احجز',
+                gallery: 'معرض الصور',
+                guide: 'دليل',
+                more: 'المزيد',
+                about: 'عن الشركة',
+                contact: 'اتصل بنا',
+                faq: 'الأسئلة الشائعة',
+                planTrip: 'خطط رحلتك',
+                form: {
+                    phone: 'رقم الهاتف',
+                    dob: 'تاريخ الميلاد',
+                    familyName: 'اسم العائلة',
+                    firstName: 'الاسم الأول',
+                    send: 'إرسال',
+                    city: 'المدينة',
+                    email: 'البريد الإلكتروني',
+                    terms: 'أوافق على الشروط والأحكام',
+                    offers: 'أرغب في تلقي العروض'
+                },
+                footer: {
+                    newsletter: {
+                        title: 'اشترك في نشرتنا الإخبارية',
+                        description: 'ابق على اطلاع بأحدث رحلاتنا وعروضنا'
+                    },
+                    followMe: 'تابعني',
+                    contactUs: 'اتصل بنا',
+                    sendUs: 'أرسل لنا رسالة',
+                    importantLinks: 'روابط مهمة',
+                    cookies: 'سياسة ملفات الارتباط',
+                    consumer: 'حقوق المستهلك',
+                    terms: 'الشروط والأحكام',
+                    company: 'معلومات الشركة',
+                    planTrip: 'خطط رحلتك',
+                    visa: 'معلومات التأشيرة',
+                    flight: 'حجز الطيران',
+                    transport: 'المواصلات',
+                    accommodation: 'الإقامة',
+                    adventures: 'المغامرات',
+                    gear: 'معدات السفر',
+                    pages: 'الصفحات',
+                    book: 'احجز الآن',
+                    faq: 'الأسئلة الشائعة',
+                    contact: 'اتصل بنا',
+                    about: 'عن الشركة',
+                    costs: 'التكاليف والرسوم',
+                    copyright: '© 2024 مغامرات أبو شقرا. جميع الحقوق محفوظة.',
+                    photoCredit: 'الصور من تصوير فنانين متنوعين'
+                }
+            }
+        };
+
+        // Language Context with translations
+        const LanguageContext = React.createContext();
+
+        const LanguageProvider = ({ children }) => {
+            const [language, setLanguage] = React.useState(() => {
+                return localStorage.getItem('preferredLanguage') || 'en'
+            });
+
+            React.useEffect(() => {
+                localStorage.setItem('preferredLanguage', language);
+            }, [language]);
+
+            const value = {
+                language,
+                setLanguage,
+                translations: translations[language] // Add translations to context
+            };
+
+            return (
+                <LanguageContext.Provider value={value}>
+                    {children}
+                </LanguageContext.Provider>
+            );
+        };
+
+        // Navbar Component
+        const Navbar = () => {
+            const { language, setLanguage, translations } = React.useContext(LanguageContext);
+            const [showMobileMenu, setShowMobileMenu] = React.useState(false);
+            const [showDropdown, setShowDropdown] = React.useState(false);
+            const [showMoreMenu, setShowMoreMenu] = React.useState(false);
+            const [activeSection, setActiveSection] = React.useState('home');
+
+            const currentTranslations = translations;
+
+            const handleNavClick = (section, event) => {
+                event.preventDefault();
+                if (section === 'book') {
+                    window.location.href = 'booking.html';
+                    return;
+                }
+                setActiveSection(section);
+                const element = document.getElementById(section);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            return (
+                <nav className="fixed top-0 left-0 right-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm">
+                    <div className="flex items-center justify-between w-full p-4 mx-auto">
+                        {/* Logo Section */}
+                        <div className="flex items-center space-x-2">
+                            <img src="logo.jpeg" alt="Logo" className="h-8 w-8 md:h-12 md:w-12" />
+                            <div className="text-white text-lg md:text-2xl font-bold">Mustafa</div>
+                            <div className="text-white text-xs md:text-sm">Thailand</div>
+                        </div>
+
+                        {/* Mobile Menu Button */}
+                        <button 
+                            className="md:hidden text-white"
+                            onClick={() => setShowMobileMenu(!showMobileMenu)}
+                        >
+                            <i className={`fas fa-${showMobileMenu ? 'times' : 'bars'}`}></i>
+                        </button>
+
+                        {/* Desktop Menu */}
+                        <div className="hidden md:flex items-center space-x-4">
+                            <div className="flex items-center bg-white rounded-full px-4 py-2 space-x-4">
+                                {['home', 'book', 'gallery', 'guide'].map(( section) => (
+                                    <a
+                                        key={section}
+                                        href={`#${section}`}
+                                        onClick={(e) => handleNavClick(section, e)}
+                                        className={`text-gray-700 hover:text-black transition-colors ${
+                                            activeSection === section ? 'font-bold' : ''
+                                        }`}
+                                    >
+                                        {currentTranslations[section]}
+                                    </a>
+                                ))}
+                                
+                                <div className="relative">
+                                    <button 
+                                        onClick={() => setShowMoreMenu(!showMoreMenu)}
+                                        className="text-gray-700 hover:text-black transition-colors"
+                                    >
+                                        {currentTranslations.more}
+                                    </button>
+                                    
+                                    {showMoreMenu && (
+                                        <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
+                                            {['about', 'contact', 'faq'].map((item) => (
+                                                <a
+                                                    key={item}
+                                                    href={`#${item}`}
+                                                    onClick={(e) => {
+                                                        handleNavClick(item, e);
+                                                        setShowMoreMenu(false);
+                                                    }}
+                                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    {currentTranslations[item]}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => setShowDropdown(!showDropdown)}
+                                className="flex items-center bg-white rounded-full px-4 py-2 space-x-2"
+                            >
+                                <span>{language.toUpperCase()}</span>
+                                <i className="fas fa-chevron-down"></i>
+                            </button>
+                            
+                            {showDropdown && (
+                                <div className="absolute top-16 right-4 w-32 bg-white rounded-lg shadow-lg">
+                                    <button 
+                                        onClick={() => {
+                                            setLanguage('en');
+                                            setShowDropdown(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                    >
+                                        English
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setLanguage('ar');
+                                            setShowDropdown(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                    >
+                                        العربية
+                                    </button>
+                                </div>
+                            )}
+
+                            <button className="flex items-center bg-black text-white rounded-full px-4 py-2 space-x-2">
+                                <span>{currentTranslations.planTrip}</span>
+                                <i className="fas fa-plane"></i>
+                            </button>
+                        </div>
+
+                        {/* Mobile Menu Overlay */}
+                        {showMobileMenu && (
+                            <div className="fixed inset-0 bg-black bg-opacity-90 z-50 md:hidden">
+                                <div className="flex flex-col items-center pt-20 space-y-6">
+                                    {['home', 'book', 'gallery', 'guide'].map((section) => (
+                                        <a
+                                            key={section}
+                                            href={`#${section}`}
+                                            onClick={(e) => {
+                                                handleNavClick(section, e);
+                                                setShowMobileMenu(false);
+                                            }}
+                                            className="text-white text-xl"
+                                        >
+                                            {currentTranslations[section]}
+                                        </a>
+                                    ))}
+                                    
+                                    {/* Language Selector */}
+                                    <div className="flex flex-col items-center space-y-4">
+                                        <button 
+                                            onClick={() => setLanguage('en')}
+                                            className="text-white text-xl"
+                                        >
+                                            English
+                                        </button>
+                                        <button 
+                                            onClick={() => setLanguage('ar')}
+                                            className="text-white text-xl"
+                                        >
+                                            العربية
+                                        </button>
+                                    </div>
+
+                                    {/* Close Button */}
+                                    <button 
+                                        className="absolute top-4 right-4 text-white"
+                                        onClick={() => setShowMobileMenu(false)}
+                                    >
+                                        <i className="fas fa-times text-2xl"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </nav>
+            );
+        };
+        // Footer Component
+        const Footer = () => {
+            const { language, translations } = React.useContext(LanguageContext);
+            const { footer } = translations;
+
+            return (
+                <footer className="w-full bg-black py-12 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Newsletter Form Section */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                            <div className="flex flex-col items-center space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                                    <input type="text" placeholder={translations.form.phone} className="bg-gray-800/50 text-white p-2 rounded-full" />
+                                    <input type="text" placeholder={translations.form.dob} className="bg-gray-800/50 text-white p-2 rounded-full" />
+                                    <input type="text" placeholder={translations.form.familyName} className="bg-gray-800/50 text-white p-2 rounded-full" />
+                                    <input type="text" placeholder={translations.form.firstName} className="bg-gray-800/50 text-white p-2 rounded-full" />
+                                </div>
+                                <div className="flex flex-wrap gap-4 w-full">
+                                    <button className="bg-white text-black px-8 py-2 rounded-full hover:bg-gray-100">{translations.form.send}</button>
+                                    <input type="text" placeholder={translations.form.city} className="bg-gray-800/50 text-white p-2 rounded-full flex-grow" />
+                                    <input type="text" placeholder={translations.form.email} className="bg-gray-800 /50 text-white p-2 rounded-full flex-grow" />
+                                </div>
+                                <div className="flex flex-col items-start space-y-2 w-full">
+                                    <label className="flex items-center space-x-2 text-sm">
+                                        <input type="radio" name="option" className="form-radio" />
+                                        <span>{translations.form.terms}</span>
+                                    </label>
+                                    <label className="flex items-center space-x-2 text-sm">
+                                        <input type="radio" name="option" className="form-radio" />
+                                        <span>{translations.form.offers}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col items-center md:items-end justify-center text-right">
+                                <h2 className="text-xl font-bold mb-4">{footer.newsletter.title}</h2>
+                                <p className="text-gray-300">{footer.newsletter.description}</p>
+                            </div>
+                        </div>
+
+                        {/* Main Footer Links */}
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
+                            {/* Follow me */}
+                            <div className="flex flex-col items-center md:items-start space-y-4">
+                                <h3 className="text-lg font-bold">{footer.followMe}</h3>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="text-white hover:text-gray-300">
+                                        <i className="fab fa-instagram text-xl"></i>
+                                    </a>
+                                    <a href="#" className="text-white hover:text-gray-300">
+                                        <i className="fab fa-facebook text-xl"></i>
+                                    </a>
+                                    <a href="#" className="text-white hover:text-gray-300">
+                                        <i className="fab fa-youtube text-xl"></i>
+                                    </a>
+                                    <a href="#" className="text-white hover:text-gray-300">
+                                        <i className="fab fa-tiktok text-xl"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Contact us */}
+                            <div className="flex flex-col items-center md:items-start space-y-4">
+                                <h3 className="text-lg font-bold">{footer.contactUs}</h3>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.sendUs}</a>
+                            </div>
+
+                            {/* Important Links */}
+                            <div className="flex flex-col items-center md:items-start space-y-2">
+                                <h3 className="text-lg font-bold">{footer.importantLinks}</h3>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.cookies}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.consumer}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.terms}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.company}</a>
+                            </div>
+
+                            {/* Plan your trip */}
+                            <div className="flex flex-col items-center md:items-start space-y-2">
+                                <h3 className="text-lg font-bold">{footer.planTrip}</h3>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.visa}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.flight}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.transport}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.accommodation}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.adventures}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.gear}</a>
+                            </div>
+
+                            {/* Home Pages */}
+                            <div className="flex flex-col items-center md:items-start space-y-2">
+                                <h3 className="text-lg font-bold">{footer.pages}</h3>
+                                <a href="booking.html" className="text-gray-300 hover:text-white">{footer.book}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.planTrip}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.faq}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.contact}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.about}</a>
+                                <a href="#" className="text-gray-300 hover:text-white">{footer.costs}</a>
+                            </div> 
+                        </div>
+
+                        {/* Logo and Copyright */}
+                        <div className="border-t border-gray-800 pt-8 mt-8">
+                            <div className="flex flex-col items-center space-y-4">
+                                <img src="logo.jpeg" alt="Mustafa Thailand" className="h-16" />
+                                <p className="text-gray-400">{footer.copyright}</p>
+                                <p className="text-gray-400">{footer.photoCredit}</p>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+        // Trip Booking Page Component
+        const TripBookingPage = () => {
+            const { language } = React.useContext(LanguageContext);
+            const [activeCategory, setActiveCategory] = React.useState('all');
+
+            const handleTripClick = (trip) => {
+                // Store the trip data in localStorage
+                localStorage.setItem('selectedTrip', JSON.stringify({
+                    ...trip,
+                    countries: trip.countries || [],
+                    startDate: trip.startDate,
+                    endDate: trip.endDate,
+                    startTime: trip.startTime,
+                    endTime: trip.endTime,
+                    groupType: trip.groupType,
+                    location: trip.location,
+                    priceIncludes: trip.priceIncludes,
+                    priceExcludes: trip.priceExcludes
+                }));
+                // Navigate to trip details page
+                window.location.href = `trip-details.html?id=${trip.id}`;
+            };
+
+            const tripCategories = [
+                {
+                    id: 'honeymoon',
+                    title: language === 'ar' ? 'رحلات شهر العسل' : 'Honeymoon Trips',
+                    trips: [
+                        {
+                            id: 'bali-escape',
+                            img: "https://images.pexels.com/photos/5137664/pexels-photo-5137664.jpeg",
+                            title: language === 'ar' ? 'شهر عسل في بالي' : 'Romantic Bali Escape',
+                            description: language === 'ar' ? 'تجربة رومانسية لا تنسى' : 'Unforgettable romantic experience',
+                            duration: "7 days",
+                            startDate: "15.06.2024",
+                            endDate: "22.06.2024",
+                            startTime: "12:00",
+                            endTime: "18:00",
+                            groupType: language === 'ar' ? 'ثنائي' : 'Couple',
+                            location: language === 'ar' ? 'بالي، إندونيسيا' : 'Bali, Indonesia',
+                            countries: [
+                                { name: 'Indonesia', code: 'ID' }
+                            ],
+                            priceIncludes: language === 'ar' 
+                                ? 'الإقامة في فيلا فاخرة، وجبات الإفطار، جولات خاصة، نقل من وإلى المطار، جلسات سبا' 
+                                : 'Luxury villa accommodation, breakfasts, private tours, airport transfers, spa sessions',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران، التأشيرة، المصروفات الشخصية، بعض الوجبات'
+                                : 'Flights, visa, personal expenses, some meals'
+                        },
+                        {
+                            id: 'maldives-magic',
+                            img: "https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg",
+                            title: language === 'ar' ? 'جزر المالديف الساحرة' : 'Magical Maldives',
+                            description: language === 'ar' ? 'فيلا على الماء مع إطلالات خلابة' : 'Overwater villa with stunning views',
+                            duration: "8 days",
+                            startDate: "01.07.2024",
+                            endDate: "08.07.2024",
+                            startTime: "14:00",
+                            endTime: "12:00",
+                            groupType: language === 'ar' ? 'ثنائي' : 'Couple',
+                            location: language === 'ar' ? 'جزر المالديف' : 'Maldives',
+                            countries: [
+                                { name: 'Maldives', code: 'MV' }
+                            ],
+                            priceIncludes: language === 'ar'
+                                ? 'فيلا فاخرة على الماء، جميع الوجبات، رحلات الغوص، نقل بالطائرة المائية'
+                                : 'Luxury overwater villa, all meals, diving trips, seaplane transfers',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران الدولية، التأمين، المشروبات الكحولية'
+                                : 'International flights, insurance, alcoholic beverages'
+                        }
+                    ]
+                },
+                {
+                    id: 'family',
+                    title: language === 'ar' ? 'رحلات عائلية' : 'Family Adventures',
+                    trips: [
+                        {
+                            id: 'phuket-family',
+                            img: "https://images.pexels.com/photos/5089152/pexels-photo-5089152.jpeg",
+                            title: language === 'ar' ? 'مغامرة بوكيت العائلية' : 'Phuket Family Adventure',
+                            description: language === 'ar' ? 'أنشطة ممتعة لجميع أفراد العائلة' : 'Fun activities for the whole family',
+                            duration: "6 days",
+                            startDate: "10.08.2024",
+                            endDate: "16.08.2024",
+                            startTime: "13:00",
+                            endTime: "11:00",
+                            groupType: language === 'ar' ? 'عائلي' : 'Family',
+                            location: language === 'ar' ? 'بوكيت، تايلاند' : 'Phuket, Thailand',
+                            countries: [
+                                { name: 'Thailand', code: 'TH' }
+                            ],
+                            priceIncludes: language === 'ar'
+                                ? 'إقامة فندقية، إفطار يومي، أنشطة عائلية، حديقة مائية، رحلات جزرية'
+                                : 'Hotel accommodation, daily breakfast, family activities, water park, island trips',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران، بعض الوجبات، المصروفات الشخصية'
+                                : 'Flights, some meals, personal expenses'
+                        },
+                        {
+                            id: 'samui-escape',
+                            img: "https://images.pexels.com/photos/3601456/pexels-photo-3601456.jpeg",
+                            title: language === 'ar' ? 'عطلة كوه ساموي' : 'Koh Samui Escape',
+                            description: language === 'ar' ? 'شواطئ آمنة وأنشطة للأطفال' : 'Safe beaches and kids activities',
+                            duration: "7 days",
+                            startDate: "20.07.2024",
+                            endDate: "27.07.2024",
+                            startTime: "12:00",
+                            endTime: "10:00",
+                            groupType: language === 'ar' ? 'عائلي' : 'Family',
+                            location: language === 'ar' ? 'كوه ساموي، تايلاند' : 'Koh Samui, Thailand',
+                            countries: [
+                                { name: 'Thailand', code: 'TH' }
+                            ],
+                            priceIncludes: language === 'ar'
+                                ? 'منتجع عائلي، وجبات الإفطار، نادي للأطفال، رحلات شاطئية'
+                                : 'Family resort, breakfasts, kids club, beach excursions',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران، التأمين، بعض الوجبات، المصروفات الشخصية'
+                                : 'Flights, insurance, some meals, personal expenses'
+                        }
+                    ]
+                },
+                {
+                    id: 'group',
+                    title: language === 'ar' ? 'رحلات جماعية' : 'Group Tours',
+                    trips: [
+                        {
+                            id: 'chiang-mai-explorer',
+                            img: "https://images.pexels.com/photos/5089167/pexels-photo-5089167.jpeg",
+                            title: language === 'ar' ? 'استكشاف شيانغ ماي' : 'Chiang Mai Explorer',
+                            description: language === 'ar' ? 'ثقافة وتقاليد ومغامرات' : 'Culture, traditions, and adventures',
+                            duration: "5 days",
+                            startDate: "05.09.2024",
+                            endDate: "10.09.2024",
+                            startTime: "09:00",
+                            endTime: "17:00",
+                            groupType: language === 'ar' ? 'مجموعة' : 'Group',
+                            location: language === 'ar' ? 'شيانغ ماي، تايلاند' : 'Chiang Mai, Thailand',
+                            countries: [
+                                { name: 'Thailand', code: 'TH' }
+                            ],
+                            priceIncludes: language === 'ar'
+                                ? 'إقامة فندقية، معظم الوجبات، جولات ثقافية، زيارة المعابد، دروس الطبخ'
+                                : 'Hotel accommodation, most meals, cultural tours, temple visits, cooking classes',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران، بعض الوجبات، المصروفات الشخصية'
+                                : 'Flights, some meals, personal expenses'
+                        },
+                        {
+                            id: 'krabi-discovery',
+                            img: "https://images.pexels.com/photos/3601478/pexels-photo-3601478.jpeg",
+                            title: language === 'ar' ? 'جولة في كرابي' : 'Krabi Discovery',
+                            description: language === 'ar' ? 'تسلق الصخور والشواطئ الخلابة' : 'Rock climbing and beautiful beaches',
+                            duration: "6 days",
+                            startDate: "15.10.2024",
+                            endDate: "21.10.2024",
+                            startTime: "10:00",
+                            endTime: "16:00",
+                            groupType: language === 'ar' ? 'مجموعة' : 'Group',
+                            location: language === 'ar' ? 'كرابي، تايلاند' : 'Krabi, Thailand',
+                            countries: [
+                                { name: 'Thailand', code: 'TH' }
+                            ],
+                            priceIncludes: language === 'ar'
+                                ? 'إقامة فندقية، معدات التسلق، مدرب محترف، رحلات بحرية، بعض الوجبات'
+                                : 'Hotel accommodation, climbing equipment, professional instructor, boat trips, some meals',
+                            priceExcludes: language === 'ar'
+                                ? 'تذاكر الطيران، بعض الوجبات، المصروفات الشخصية، التأمين'
+                                : 'Flights, some meals, personal expenses, insurance'
+                        }
+                    ]
+                }
+            ];
+
+            return (
+                <div className="container mx-auto px-4 py-8">
+                    {/* Category Filter */}
+                    <div className="flex justify-center space-x-4 mb-8">
+                        <button 
+                            onClick={() => setActiveCategory('all')}
+                            className={`px-4 py-2 rounded-full ${activeCategory === 'all' ? 'bg-white text-black' : 'bg-gray-800'}`}
+                        >
+                            {language === 'ar' ? 'الكل' : 'All Trips'}
+                        </button>
+                        {tripCategories.map(category => (
+                            <button 
+                                key={category.id}
+                                onClick={() => setActiveCategory(category.id)}
+                                className={`px-4 py-2 rounded-full ${activeCategory === category.id ? 'bg-white text-black' : 'bg-gray-800'}`}
+                            >
+                                {category.title}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Trip Cards */}
+                    {tripCategories.map((category) => (
+                        <div key={category.id} className="mb-12">
+                            <h2 className="text-2xl font-bold mb-6">{category.title}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {category.trips.map((trip, index) => (
+                                    <div 
+                                        key={index}
+                                        className="bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer transform transition hover:scale-105"
+                                        onClick={() => handleTripClick(trip)}
+                                    >
+                                        <img 
+                                            src={trip.img} 
+                                            alt={trip.title}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                        <div className="p-4">
+                                            <h3 className="text-xl font-bold mb-2">{trip.title}</h3>
+                                            <p className="text-gray-400 mb-4">{trip.description}</p>
+                                            <div className="flex justify-between items-center">
+                                                <div>
+                                                    <span className="text-gray-400">
+                                                        <i className="far fa-clock mr-2"></i>
+                                                        {trip.duration}
+                                                    </span>
+                                                </div>
+                                                <button 
+                                                    className="bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleTripClick(trip);
+                                                    }}
+                                                >
+                                                    {language === 'ar' ? 'عرض التفاصيل' : 'View Details'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            return (
+                <LanguageProvider>
+                    <div className="min-h-screen bg-black text-white">
+                        <Navbar />
+                        <div className="pt-16"> {/* Add padding-top to account for fixed navbar */}
+                            <TripBookingPage />
+                        </div>
+                        <Footer />
+                    </div>
+                </LanguageProvider>
+            );
+        };
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
